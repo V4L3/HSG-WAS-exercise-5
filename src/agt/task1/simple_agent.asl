@@ -2,18 +2,20 @@
 
 /* Initial rules */
 /* Task 1.2.3 Start of your solution */
+odd(X) :- (X mod 2) \== 0.
+even(X) :- (X mod 2) == 0.
 /* Task 1.2.3 End of your solution */
 
 /* Initial goals */
 !start_sum(4,2). // uncomment for Task 1.2.1
 !start_sum(4,-2). // uncomment for Task 1.2.1
-//!start_division(4,2). // uncomment for Task 1.2.2
-//!start_division(4,2.5). // uncomment for Task 1.2.2
-//!start_division(4,0). // uncomment for Task 1.2.2
-//!start_even_or_odd(4). // uncomment for Task 1.2.3
-//!start_even_or_odd(5). // uncomment for Task 1.2.3
-//!start_list_generation(0,4). // uncomment for Task 1.2.4
-//!print_list([0,1,2,3,4]). // uncomment for an example of handling a list with recursion
+!start_division(4,2). // uncomment for Task 1.2.2
+!start_division(4,2.5). // uncomment for Task 1.2.2
+!start_division(4,0). // uncomment for Task 1.2.2
+!start_even_or_odd(4). // uncomment for Task 1.2.3
+!start_even_or_odd(5). // uncomment for Task 1.2.3
+!start_list_generation(0,4). // uncomment for Task 1.2.4
+// !print_list([0,1,2,3,4]). // uncomment for an example of handling a list with recursion
 
 /* 
  * Plan for reacting to the addition of the goal !start_sum
@@ -29,7 +31,8 @@
 /* Task 1.2.1 Start of your solution */
 @compute_sum_task_1_2_1_plan
 +!compute_sum(X,Y,Sum) : true <-
-    .print("Implement Task 1.2.1").
+    .print("Implement Task 1.2.1");
+    Sum = X + Y.
 /* Task 1.2.1 End of your solution */
 
 @start_division_task_1_2_2_plan
@@ -38,6 +41,13 @@
     .print(Dividend, "/", Divisor, "=", Quotient).
 
 /* Task 1.2.2 Start of your solution */
+@compute_impossible_division_task_1_2_2_plan
++!compute_division(Dividend,Divisor,Quotient): Divisor == 0 <-
+    Quotient = "Division is not possible!".
+
+@compute_division_task_1_2_2_plan
++!compute_division(Dividend,Divisor,Quotient): true <-
+    Quotient = Dividend / Divisor.
 /* Task 1.2.2 End of your solution */
 
 /* 
@@ -88,11 +98,17 @@
 */
 @start_list_generation_1_2_4_plan
 +!start_list_generation(Start, End) : true <-
-   !compute_list(Start, End, [], List);
+   !compute_list(Start, End, List);
    .print("List with integers from ", Start, " to ", End, ": ", List).
 
 /* Task 1.2.4 Start of your solution */
-// You are allowed to use a triggering event other than the one provided 
++!compute_list(Start,End,List) : Start < End <-
+    !compute_list(Start + 1, End, ListFragment);
+    List = [Start | ListFragment].
+
++!compute_list(Start,End,List) : Start >= End <-
+    List = [End].
+
 /* Task 1.2.4 End of your solution */
 
 /* 
@@ -101,7 +117,7 @@
  * Context: true (the plan is always applicable)
  * Body: informs about the failure
 */
--!compute_list(Start, End,_,_) : true <-
+-!compute_list(Start, End,_) : true <-
     .print("Unable to compute a list with integers from ", Start, " to ", End).
 
 /* 
