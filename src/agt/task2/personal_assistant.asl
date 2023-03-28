@@ -3,14 +3,27 @@
 /* Task 2 Start of your solution */
 
 /* Interference rules */
-best_option("vibration") :- ranking_for_vibration(Ranking) & not methodUsed("vibration") & Ranking < ranking_for_artificial_light(Ranking) & Ranking < ranking_for_natural_light(Ranking).
-best_option("artificial_light") :- ranking_for_artificial_light(Ranking) & not methodUsed("artificial_light") & Ranking < ranking_for_vibration(Ranking) & Ranking < ranking_for_natural_light(Ranking).
-best_option("natural_light") :- ranking_for_natural_light(Ranking) & not methodUsed("natural_light") & Ranking < ranking_for_artificial_light(Ranking) & Ranking < ranking_for_vibration(Ranking).
+best_option("vibration") :- ranking_V(RankingV) 
+    & ranking_AL(RankingAL) 
+    & ranking_NL(RankingNL) 
+    & is_highest_ranking(RankingV, RankingAL, RankingNL).
+
+best_option("artificial_light") :- ranking_AL(RankingAL) 
+    & ranking_V(RankingV) 
+    & ranking_NL(RankingNL) 
+    & is_highest_ranking(RankingAL, RankingNL, RankingV).
+
+best_option("natural_light") :- ranking_NL(RankingNL) 
+    & ranking_V(RankingV)
+    & ranking_AL(RankingAL) 
+    & is_highest_ranking(RankingNL, RankingAL, RankingV).
+
+is_highest_ranking(X,Y,Z) :- (X \== "methodUsed") & (X < Y) & (X < Z).
 
 /* Initial beliefs */
-ranking_for_artificial_light(2).
-ranking_for_natural_light(1).
-ranking_for_vibration(0).
+ranking_AL(2).
+ranking_NL(1).
+ranking_V(0).
 
 /* Initial goals */
 
@@ -39,24 +52,28 @@ ranking_for_vibration(0).
 @wakeup_with_vibration_plan
 +!wake_up_user : owner_state("asleep") & best_option("vibration") <-
     .print("Setting mattress to vibration mode.");
-    +methodUsed("vibration");
+    -ranking_V(_);
+    +ranking_V("methodUsed");
     setVibrationsMode.
 
 @wakeup_with_natural_light_plan
 +!wake_up_user : owner_state("asleep") & best_option("natural_light") <-
     .print("Raising the blinds.");
-    +methodUsed("natural_light");
+    -ranking_NL(_);
+    +ranking_NL("methodUsed");
     raiseBlinds.
 
 @wakeup_with_artificial_light_plan
 +!wake_up_user : owner_state("asleep") & best_option("artificial_light") <-
     .print("Turning on the lights.");
-    +methodUsed("artificial_light");
+    -ranking_AL(_);
+    +ranking_AL("methodUsed");
     turnOnLights.
 
 @wakeup_plan
 +!wake_up_user : owner_state("asleep") <-
-    .print("No best option set").
+    .print("No best option set");
+    -start_wake_up_routine. //removing the goal so there is no infinite loop
 
 @blinds_plan
 +blinds(State) : true <- 
